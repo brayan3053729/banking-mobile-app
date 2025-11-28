@@ -1,6 +1,7 @@
 import { useState } from "react";
 import  Splash from "./src/screens/Splash"; 
-import Register from "./src/screens/Register"; 
+import Register from "./src/screens/Register";
+import Login from "./src/screens/Login";
 
 export default function App() {
   const [showSplash, setshowSplash] = useState(true);

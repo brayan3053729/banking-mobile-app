@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { PostgrestError } from '@supabase/supabase-js';
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcryptjs';
+import { useRouter } from 'expo-router';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -47,6 +48,8 @@ const Register: React.FC = () => {
     return null;
   };
 
+  const router = useRouter();
+
   const handleRegister = async () => {
     const err = validate();
     if (err) {
@@ -57,6 +60,15 @@ const Register: React.FC = () => {
     try {
       setLoading(true);
 
+      // create auth user in Supabase (this will create credentials in the auth system)
+      const { data: authData, error: signupError } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password: String(password),
+      });
+
+      if (signupError) throw signupError;
+
+      // hash the password to keep the existing users table behaviour
       const hashed = await bcrypt.hash(password, 10);
 
       const nowIso = new Date().toISOString();
@@ -71,12 +83,18 @@ const Register: React.FC = () => {
         updated_at: nowIso,
         deleted_at: null as any,
       };
+      // attach the Auth user id when available so profiles can be linked to auth
+      if (authData?.user?.id) (payload as any).auth_user_id = authData.user.id;
+
       const { error } = await supabase.from('users').insert(payload);
 
       if (error) throw error;
 
-      Alert.alert('Success', 'User registered successfully');
+      Alert.alert('Success', 'User registered successfully — revisa tu correo si es necesario para confirmar la cuenta.');
       resetForm();
+
+      // after registering, redirect user to login screen to sign-in
+      router.push('./Login');
     } catch (e) {
       const s = (e as PostgrestError)?.message || (e as Error)?.message || 'Unknown error';
       Alert.alert('Registration failed', s);

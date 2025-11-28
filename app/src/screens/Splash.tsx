@@ -13,9 +13,12 @@ const Splash = ({ onFinish }: { onFinish: () => void }) => {
         return () => clearTimeout(timer);
     }, [onFinish]);
     return (
-        <View>
+
+
+        <View style={styles.contrainer}>
             <Image
                 source={require('../screens/images/logo.png')}
+                style={styles.logo}
                 resizeMode='contain'
             />
         </View>
@@ -27,7 +30,7 @@ const styles =StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor:'rgba(8, 4, 243, 1)'
+        backgroundColor:'rgba(10, 8, 7, 0.99)'
     },
     logo:{
         width:200,
